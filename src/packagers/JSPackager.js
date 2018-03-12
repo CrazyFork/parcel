@@ -9,11 +9,27 @@ const prelude = {
     .readFileSync(path.join(__dirname, '../builtins/prelude.js'), 'utf8')
     .trim(),
   minified: fs
-    .readFileSync(path.join(__dirname, '../builtins/prelude.min.js'), 'utf8')
+    .readFileSync(path.join(__dirname, '../builtins/prelude.min.js'), 'utf8') // where is this .min.js file?
     .trim()
     .replace(/;$/, '')
 };
 
+/**
+ * this jspackager packages all js file into a single file, with format of
+ *
+ *  ../builtins/prelude.js(modules: {
+ *    [id: number]: [module: [
+ *      moduleSrcCode: string, dep: string
+ *    ]]
+ *  }, cache: {}, entry: string)
+ *
+ *  modules includes:
+ *    src codes
+ *    hmr codes
+ *    bundle loaders, only one with types founded
+ *    any preload codes
+ *
+ */
 class JSPackager extends Packager {
   async start() {
     this.first = true;
@@ -45,7 +61,7 @@ class JSPackager extends Packager {
     }
 
     let deps = {};
-    for (let [dep, mod] of asset.depAssets) {
+    for (let [dep, mod] of asset.depAssets) { // depAssets, Map<dep: object, assetDep: Asset>
       // For dynamic dependencies, list the child bundles to load along with the module id
       if (dep.dynamic && this.bundle.childBundles.has(mod.parentBundle)) {
         let bundles = [this.getBundleSpecifier(mod.parentBundle)];
@@ -57,7 +73,7 @@ class JSPackager extends Packager {
         }
 
         bundles.push(mod.id);
-        deps[dep.name] = bundles;
+        deps[dep.name] = bundles; // collect this assets deps
         this.bundleLoaders.add(mod.type);
       } else {
         deps[dep.name] = this.dedupe.get(mod.generated.js) || mod.id;
@@ -75,7 +91,7 @@ class JSPackager extends Packager {
       }
     }
 
-    this.bundle.addOffset(asset, this.lineOffset);
+    this.bundle.addOffset(asset, this.lineOffset); // :?, 作用是什么
     await this.writeModule(
       asset.id,
       asset.generated.js,
@@ -95,6 +111,12 @@ class JSPackager extends Packager {
 
   async writeModule(id, code, deps = {}, map) {
     let wrapped = this.first ? '' : ',';
+    /*
+    格式:
+    {
+      [id: string]: [`function code`, dep: object]
+    }
+    */
     wrapped +=
       id + ':[function(require,module,exports) {\n' + (code || '') + '\n},';
     wrapped += JSON.stringify(deps);
@@ -150,7 +172,7 @@ class JSPackager extends Packager {
       if (loader) {
         let asset = await this.bundler.getAsset(loader);
         await this.addAssetToBundle(asset);
-        loads +=
+        loads +=  // register bundle loader with `type` and `src code`
           'b.register(' +
           JSON.stringify(bundleType) +
           ',require(' +

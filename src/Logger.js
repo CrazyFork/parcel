@@ -75,7 +75,7 @@ class Logger {
     }
 
     while (this.lines > 0) {
-      readline.clearLine(process.stdout, 0);
+      readline.clearLine(process.stdout, 0); // todo: how this got manipulated underneath?
       readline.moveCursor(process.stdout, 0, -1);
       this.lines--;
     }

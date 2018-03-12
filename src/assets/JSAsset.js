@@ -18,6 +18,8 @@ const FS_RE = /\breadFileSync\b/;
 const SW_RE = /\bnavigator\s*\.\s*serviceWorker\s*\.\s*register\s*\(/;
 const WORKER_RE = /\bnew\s*Worker\s*\(/;
 
+// this file defines the behavior of how to process js assets,
+// collect deps, replace & inline process.env & fs.readFileSync, set globals etc.
 class JSAsset extends Asset {
   constructor(name, pkg, options) {
     super(name, pkg, options);
@@ -101,10 +103,10 @@ class JSAsset extends Asset {
     if (this.options.target === 'browser') {
       if (this.dependencies.has('fs') && FS_RE.test(this.contents)) {
         await this.parseIfNeeded();
-        this.traverse(fsVisitor);
+        this.traverse(fsVisitor); // 将 fs.readFileSync 替换成 base64, 或者 string
       }
 
-      if (GLOBAL_RE.test(this.contents)) {
+      if (GLOBAL_RE.test(this.contents)) { // 将assets 中的 global 对象替换成别的声明
         await this.parseIfNeeded();
         walk.ancestor(this.ast, insertGlobals, this);
       }
@@ -115,7 +117,7 @@ class JSAsset extends Asset {
     }
 
     if (this.options.minify) {
-      await uglify(this);
+      await uglify(this); // this would clear this.ast data
     }
   }
 
@@ -159,6 +161,7 @@ class JSAsset extends Asset {
     }
 
     if (this.globals.size > 0) {
+      // in transform method, this.globals was set, here it got insert before code section
       code = Array.from(this.globals.values()).join('\n') + '\n' + code;
       if (this.options.sourceMaps) {
         if (!(this.sourceMap instanceof SourceMap)) {

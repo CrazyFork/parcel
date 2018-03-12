@@ -4,6 +4,7 @@ const valueParser = require('postcss-value-parser');
 const postcssTransform = require('../transforms/postcss');
 const CssSyntaxError = require('postcss/lib/css-syntax-error');
 
+// https://regex101.com/
 const URL_RE = /url\s*\("?(?![a-z]+:)/;
 const IMPORT_RE = /@import/;
 const PROTOCOL_RE = /^[a-z]+:/;
@@ -46,14 +47,14 @@ class CSSAsset extends Asset {
         throw new Error('Could not find import name for ' + rule);
       }
 
-      if (PROTOCOL_RE.test(dep)) {
+      if (PROTOCOL_RE.test(dep)) { // skip url start with protocal
         return;
       }
 
       media = valueParser.stringify(media).trim();
       this.addDependency(dep, {media, loc: rule.source.start});
 
-      rule.remove();
+      rule.remove(); // remote import node ?
       this.ast.dirty = true;
     });
 
@@ -69,10 +70,10 @@ class CSSAsset extends Asset {
             node.nodes.length
           ) {
             let url = this.addURLDependency(node.nodes[0].value, {
-              loc: decl.source.start
+              loc: decl.source.start // :bm, source start
             });
-            dirty = node.nodes[0].value !== url;
-            node.nodes[0].value = url;
+            dirty = node.nodes[0].value !== url; // the dependent url hasn't been processed
+            node.nodes[0].value = url; // override url
           }
         });
 
@@ -97,6 +98,7 @@ class CSSAsset extends Asset {
     return this.ast.root;
   }
 
+  // return {css, js}, js is the meta code for reload css
   generate() {
     let css = this.ast ? this.ast.render() : this.contents;
 
@@ -104,6 +106,7 @@ class CSSAsset extends Asset {
     if (this.options.hmr) {
       this.addDependency('_css_loader');
 
+      // `_css_loader` is defined at src/builtins/index.js
       js = `
         var reloadCSS = require('_css_loader');
         module.hot.dispose(reloadCSS);

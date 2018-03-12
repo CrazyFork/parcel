@@ -69,7 +69,7 @@ class Parser {
   getAsset(filename, pkg, options = {}) {
     let Asset = this.findParser(filename);
     options.parser = this;
-    return new Asset(filename, pkg, options);
+    return new Asset(filename, pkg, options); // :bm, inject corresponding parser into asset
   }
 }
 

@@ -5,6 +5,7 @@ const prettyError = require('./utils/prettyError');
 const generateCertificate = require('./utils/generateCertificate');
 const logger = require('./Logger');
 
+// :todo, server 的逻辑大致看懂了, 问题是如何在一起工作的, 和client端
 class HMRServer {
   async start(options = {}) {
     await new Promise(resolve => {

@@ -1,3 +1,68 @@
+## notes
+
+  WorkerFarm 中同时继承两个类的写法, 注意下 EventEmitter mixin的写法
+  objectHash 写法
+  本 lib 中大量的 async await 写法, 
+
+  Logger.js 中最下面的 IPC 写法需要好好关注下, 还有用 readline 操作 stdout, stderr cursor
+  bundler-loader 中的 LazyPromise 实现需要注意下
+    中有些东西没看懂
+
+  hmr-runtime 中的 modules 的操作也是没有看懂, 不知道是 nodejs module 机制 还是 hmr 自有的 module 机制知识缺失
+
+  prelude.js 也没看懂
+  builtins 里边的机制还需要捋一捋
+
+  clear :todo, :?
+
+  PromiseQueue 的数据结构需要好好注意下, 实现很有意思
+
+  src/WorkerFarm.js 的实现也需要注意下, 通过底层一个第三方库的支持, 从而实现了任务的多进程执行, 封装来看使用基本看不出任何
+  差别和不便
+
+  
+
+
+  visitors 中操作 ast 参考 
+    [babel handbook](https://www.npmjs.com/package/babel-plugin-handbook#paths)
+    [](https://www.sitepoint.com/understanding-asts-building-babel-plugin/)
+
+
+  (1, eval)('this') vs eval('this') in JavaScript?
+    https://stackoverflow.com/questions/9107240/1-evalthis-vs-evalthis-in-javascript
+
+    (1, eval)('this') // 通过表达式返回的eval, 叫 indirect eval, guaranteed to executed in global context
+    eval('this') // direct eval executed in current context
+
+
+  代码库中有大量的babel操作, 这个可以说好好借鉴下, (不得不说这js生态库的文档都是尼玛坑爹的, 要找啥找不到)
+  还有 postcss 解析 css 语法树的操作
+    
+  
+  src/builtins/prelude.js 
+    这个文件的require函数写的好难懂,
+    builtins 这个包里边的文件其实写的都比较难懂, 尤其是 resolve 的各种机制,  这里边的文件好多都会被写到最终的bundle的js file当中
+
+  
+
+
+## Glossary
+* Asset: 一个 Asset 代表一个文件
+* Bundle: 是由多个Asset文件组成的, 但是有一个入口, 代表最终打包成的一个文件. Bundle 是一个树形结构的, 代表可以容纳其他Bundle
+  * Bundle 中包含Assets 也是一个树形结构的, 只不过是简单的用Set搞的递归, Package 过程会把所有的 Assets 抽离出来
+* Bundler: 负责打包的Controller
+* Parser: 是一个可以通过文件后缀名, 获得对应specific Asset generator 生成对应的Asset
+* Packager: 不同类型不同的Packager, 负责真正的打包事宜
+
+
+
+## todos
+
+* clear todos
+* hmr 机制
+* 
+
+##
 <p align="center">
   <a href="https://parceljs.org/" target="_blank">
     <img alt="Parcel" src="https://user-images.githubusercontent.com/19409/31321658-f6aed0f2-ac3d-11e7-8100-1587e676e0ec.png" width="749">

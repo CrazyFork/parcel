@@ -4,6 +4,8 @@ const path = require('path');
 const promisify = require('./promisify');
 const resolve = promisify(require('resolve'));
 
+// programatically install npm modules through spawn process
+// notice here how this kind of spawned process are handled.
 async function install(dir, modules, installPeers = true) {
   let location = await config.resolve(dir, ['yarn.lock', 'package.json']);
 

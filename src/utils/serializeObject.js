@@ -1,6 +1,7 @@
 const {minify} = require('uglify-es');
 const {serialize} = require('serialize-to-js');
 
+// serializeObject in a requirable format
 function serializeObject(obj, shouldMinify = false) {
   let code = `module.exports = ${serialize(obj)};`;
 

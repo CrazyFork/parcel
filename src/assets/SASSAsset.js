@@ -22,6 +22,7 @@ class SASSAsset extends CSSAsset {
         ? opts.indentedSyntax
         : path.extname(this.name).toLowerCase() === '.sass';
 
+    // replace sematics of 'url' function, 
     opts.functions = Object.assign({}, opts.functions, {
       url: node => {
         let filename = this.addURLDependency(node.getValue());

@@ -1,3 +1,5 @@
+// promisify function, turn a function fn(...args, cb(err, ...res)) into
+// returns  (...args)=>Promise<res>
 module.exports = function(fn) {
   return function(...args) {
     return new Promise(function(resolve, reject) {

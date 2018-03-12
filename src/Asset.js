@@ -16,6 +16,14 @@ let ASSET_ID = 1;
  * for subclasses to implement.
  */
 class Asset {
+  /**
+   *
+   * @param {*} name
+   * @param {*} pkg
+   * @param {*} options
+   *  target: string, (browser|)
+   *  sourceMaps: boolean, whether to generate source map
+   */
   constructor(name, pkg, options) {
     this.id = ASSET_ID++;
     this.name = name;
@@ -24,18 +32,18 @@ class Asset {
     this.package = pkg || {};
     this.options = options;
     this.encoding = 'utf8';
-    this.type = path.extname(this.name).slice(1);
+    this.type = path.extname(this.name).slice(1); // ext name without `.`
 
     this.processed = false;
-    this.contents = null;
-    this.ast = null;
+    this.contents = null; // raw content
+    this.ast = null;  // ast data
     this.generated = null;
-    this.hash = null;
-    this.parentDeps = new Set();
-    this.dependencies = new Map();
+    this.hash = null; // unique has using ext & conent
+    this.parentDeps = new Set(); //
+    this.dependencies = new Map(); // this asset's deps
     this.depAssets = new Map();
     this.parentBundle = null;
-    this.bundles = new Set();
+    this.bundles = new Set(); // refernce to bundle, m2m mapping
     this.cacheData = {};
   }
 
@@ -59,16 +67,20 @@ class Asset {
   async getDependencies() {
     await this.loadIfNeeded();
 
+    // by default, assume this asset have deps, to extract that info, it content need to be parsed first
     if (this.contents && this.mightHaveDependencies()) {
       await this.parseIfNeeded();
       await this.collectDependencies();
     }
   }
 
+  // name, relative path of this dependency,
+  // opts, various options during parsing
   addDependency(name, opts) {
     this.dependencies.set(name, Object.assign({name}, opts));
   }
 
+  // add a url path as dep, relative to this.name/from
   addURLDependency(url, from = this.name, opts) {
     if (!url || isURL(url)) {
       return url;
@@ -83,9 +95,10 @@ class Asset {
     const resolved = path.resolve(path.dirname(from), parsed.pathname);
     this.addDependency(
       './' + path.relative(path.dirname(this.name), resolved),
-      Object.assign({dynamic: true}, opts)
+      Object.assign({dynamic: true}, opts)  // :todo, dynamic?
     );
 
+    // :todo, get assets then what generateBundleName?
     parsed.pathname = this.options.parser
       .getAsset(resolved, this.package, this.options)
       .generateBundleName();
@@ -93,13 +106,14 @@ class Asset {
     return URL.format(parsed);
   }
 
+  // get assets's configuration
   async getConfig(filenames) {
     // Resolve the config file
     let conf = await config.resolve(this.name, filenames);
     if (conf) {
       // Add as a dependency so it is added to the watcher and invalidates
       // this asset when the config changes.
-      this.addDependency(conf, {includedInParent: true});
+      this.addDependency(conf, {includedInParent: true}); // :todo,  includedInParent
       return await config.load(this.name, filenames);
     }
 
@@ -130,6 +144,7 @@ class Asset {
     // do nothing by default
   }
 
+  // {[type: string]: [content: string]}
   async generate() {
     return {
       [this.type]: this.contents
@@ -149,6 +164,7 @@ class Asset {
     return this.generated;
   }
 
+  // using type & file content
   generateHash() {
     return objectHash(this.generated);
   }
@@ -169,6 +185,7 @@ class Asset {
     this.parentDeps.clear();
   }
 
+  // logics to generate bundle name
   generateBundleName() {
     // Resolve the main file of the package.json
     let main =

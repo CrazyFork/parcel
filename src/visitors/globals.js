@@ -2,6 +2,7 @@ const Path = require('path');
 const types = require('babel-types');
 const matchesPattern = require('./matches-pattern');
 
+// :todo, review this file. I think I need to go back and re-do babel cookbook.
 const VARS = {
   process: asset => {
     asset.addDependency('process');
@@ -9,7 +10,7 @@ const VARS = {
   },
   global: () => 'var global = (1,eval)("this");',
   __dirname: asset =>
-    `var __dirname = ${JSON.stringify(Path.dirname(asset.name))};`,
+    `var __dirname = ${JSON.stringify(Path.dirname(asset.name))};`, // JSON.stringify wrap in quotes.
   __filename: asset => `var __filename = ${JSON.stringify(asset.name)};`,
   Buffer: asset => {
     asset.addDependency('buffer');
@@ -20,7 +21,7 @@ const VARS = {
 module.exports = {
   MemberExpression(node, asset) {
     // Inline environment variables accessed on process.env
-    if (matchesPattern(node.object, 'process.env')) {
+    if (matchesPattern(node.object, 'process.env')) { // :? node.object ?
       let key = types.toComputedKey(node);
       if (types.isStringLiteral(key)) {
         let val = types.valueToNode(process.env[key.value]);
@@ -38,7 +39,7 @@ module.exports = {
       !asset.globals.has(node.name) &&
       types.isReferenced(node, parent)
     ) {
-      asset.globals.set(node.name, VARS[node.name](asset));
+      asset.globals.set(node.name, VARS[node.name](asset)); // 将 assets globals 对象替换成对应的变量声明
     }
   },
 

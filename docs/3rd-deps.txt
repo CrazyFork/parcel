@@ -1,0 +1,80 @@
+
+* resolve: implements the node require.resolve() algorithm such that you can require.resolve() on behalf of a file asynchronously and synchronously
+  * 在特定目录下用 node resolve 算法来 resolve 指定名称的 package
+  * https://www.npmjs.com/package/resolve
+
+* cross-spawn:
+  * A cross platform solution to node's spawn and spawnSync.
+  * https://www.npmjs.com/package/cross-spawn
+
+
+* json5
+  * json5 是一种在json格式上的扩展
+  * https://www.npmjs.com/package/json5
+
+
+* worker-farm
+  * 本质上就是讲计算任务下发到各个 process 中, 问题是这种 spawn child proces 这种方式高效么
+  * https://www.npmjs.com/package/worker-farm
+
+
+* v8-compile-cache
+  * require cache ? 加速require执行速度?
+  * v8-compile-cache attaches a require hook to use V8's code cache to speed up instantiation time. The "code cache" is the work of parsing and compiling done by V8.
+  * https://www.npmjs.com/package/v8-compile-cache
+
+
+* serialize-to-js
+  * Serialize objects into a require-able module while checking circular structures and respecting references.
+  * https://github.com/commenthol/serialize-to-js
+
+* node-libs-browser
+  * 感觉就是在浏览器中嵌入nodejs module的mock呢
+  * https://www.npmjs.com/package/node-libs-browser
+
+
+* babel-types
+  * This module contains methods for building ASTs manually and for checking the types of AST nodes.
+  * https://www.npmjs.com/package/babel-types
+
+* babel-template
+  * Generate an AST from a string template, 用来简化ast生成的, 用大写代替变量
+  * https://www.npmjs.com/package/babel-template
+
+
+* babel-code-frame
+  * Generate errors that contain a code frame that point to source locations.
+  * 看官网的意思貌似就是把源码字符串, col, row信息传给这个库, 然后这个库会返回一个格式化后的代码
+  * https://www.npmjs.com/package/babel-code-frame
+
+* babel-traverse
+  * babel-traverse maintains the overall tree state, and is responsible for replacing, removing, and adding nodes.
+  * https://www.npmjs.com/package/babel-traverse
+
+* babylon-walk
+  * Lightweight AST traversal tools for Babylon ASTs.
+  * 比 babel-traverse 更轻量的工具库
+  * https://www.npmjs.com/package/babylon-walk
+
+* commander
+  * cli app lib
+  * https://www.npmjs.com/package/commander
+
+* opn
+  * A better node-open. Opens stuff like websites, files, executables. Cross-platform.
+  * https://www.npmjs.com/package/opn
+
+
+* ws
+  * Simple to use, blazing fast and thoroughly tested WebSocket client and server for Node.js
+  * https://github.com/websockets/ws
+
+
+* browser-resolve
+  * resolve function which support the browser field in package.json
+  * https://github.com/defunctzombie/node-browser-resolve
+
+
+* postcss-value-parser
+  * parse css value
+  * https://www.npmjs.com/package/postcss-value-parser

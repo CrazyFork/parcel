@@ -58,7 +58,7 @@ class HTMLAsset extends Asset {
   }
 
   collectDependencies() {
-    this.ast.walk(node => {
+    this.ast.walk(node => { // this.ast is the parse method's output.
       if (node.attrs) {
         for (let attr in node.attrs) {
           if (node.tag === 'img' && attr === 'srcset') {

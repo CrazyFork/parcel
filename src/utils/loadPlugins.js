@@ -1,5 +1,6 @@
 const localRequire = require('./localRequire');
 
+// load plugin from node_modules
 module.exports = async function loadPlugins(plugins, relative) {
   if (Array.isArray(plugins)) {
     return await Promise.all(

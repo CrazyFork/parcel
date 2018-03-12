@@ -1,4 +1,4 @@
-var global = (1, eval)('this');
+var global = (1, eval)('this'); //:bm
 var OldModule = module.bundle.Module;
 function Module(moduleName) {
   OldModule.call(this, moduleName);

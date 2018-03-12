@@ -6,7 +6,7 @@ class CSSPackager extends Packager {
 
     // Figure out which media types this asset was imported with.
     // We only want to import the asset once, so group them all together.
-    let media = [];
+    let media = []; // its value is derived from parsing import statement in ast tree
     for (let dep of asset.parentDeps) {
       if (!dep.media) {
         // Asset was imported without a media type. Don't wrap in @media.

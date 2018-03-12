@@ -5,7 +5,14 @@ const builtins = require('./builtins');
 const path = require('path');
 const glob = require('glob');
 
+// :?
 class Resolver {
+  /**
+   *
+   * @param {*} options
+   *    extentions:, values pass into 'browser resolve' function
+   *    paths: string, values pass into 'browser resolve' function  
+   */
   constructor(options = {}) {
     this.options = options;
     this.cache = new Map();
@@ -27,6 +34,8 @@ class Resolver {
       return this.cache.get(key);
     }
 
+    // https://github.com/isaacs/node-glob
+    // Returns true if there are any special characters in the pattern, and false otherwise.
     if (glob.hasMagic(filename)) {
       return {path: path.resolve(path.dirname(parent), filename)};
     }
@@ -38,11 +47,18 @@ class Resolver {
       extensions = [parentExt, ...extensions.filter(ext => ext !== parentExt)];
     }
 
+    // https://github.com/defunctzombie/node-browser-resolve
     return resolver(filename, {
       filename: parent,
+      // require.paths array to use if nothing is found on the normal node_modules recursive walk
+      // in other words, it works like python path, or PATH variable in OS that used looking for binaries.
+      // in this case , this path is used looking for target libaries
       paths: this.options.paths,
+      // {[moduleName: string]: [path: string]}
       modules: builtins,
+      // doc has no description of this field
       extensions: extensions,
+      // transform the parsed package.json contents before looking at the main field
       packageFilter(pkg, pkgfile) {
         // Expose the path to the package.json file
         pkg.pkgfile = pkgfile;

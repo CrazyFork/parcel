@@ -15,9 +15,9 @@ module.exports = function(err, opts = {}) {
 
   let stack;
   if (err.codeFrame) {
-    stack = (opts.color && err.highlightedCodeFrame) || err.codeFrame;
+    stack = (opts.color && err.highlightedCodeFrame) || err.codeFrame; // :todo, when this got set & where
   } else if (err.stack) {
-    stack = err.stack.slice(err.stack.indexOf('\n') + 1);
+    stack = err.stack.slice(err.stack.indexOf('\n') + 1); // remove top most error stack
   }
 
   return {message, stack};

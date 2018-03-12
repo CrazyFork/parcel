@@ -8,6 +8,7 @@ const logger = require('./Logger');
 // These keys can affect the output, so if they differ, the cache should not match
 const OPTION_KEYS = ['publicURL', 'minify', 'hmr', 'target'];
 
+// 主要是read & write 方法, 
 class FSCache {
   constructor(options) {
     this.dir = path.resolve(options.cacheDir || '.cache');

@@ -15,14 +15,14 @@ module.exports = async function(asset) {
   if (asset.isES6Module) {
     config.babelrc = false;
     config.plugins = [
-      require('babel-plugin-transform-es2015-modules-commonjs')
+      require('babel-plugin-transform-es2015-modules-commonjs') // save dependence
     ];
   }
-
+  // 由于js生态问题, babel 文档缺失, 导致我只能猜测这个意思, 应该是从es6语法转换成es5 commonjs 语法
   let res = babel.transformFromAst(asset.ast, asset.contents, config);
   if (!res.ignored) {
     asset.ast = res.ast;
-    asset.isAstDirty = true;
+    asset.isAstDirty = true; //:?
   }
 };
 

@@ -11,6 +11,14 @@ exports.init = function(options, callback) {
   callback();
 };
 
+/**
+ * using parser handle resources, return the result through callback
+ * @param {*} path
+ * @param {*} pkg
+ * @param {*} options
+ * @param {*} isWarmUp
+ * @param {*} callback
+ */
 exports.run = async function(path, pkg, options, isWarmUp, callback) {
   try {
     options.isWarmUp = isWarmUp;

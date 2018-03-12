@@ -4,6 +4,7 @@ const mkdirp = require('mkdirp');
 const path = require('path');
 const logger = require('../Logger');
 
+// generate https private key & cert
 function generateCertificate(options = {}) {
   const privateKeyPath = path.join(options.cacheDir, 'private.pem');
   const certPath = path.join(options.cacheDir, 'primary.crt');

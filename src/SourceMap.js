@@ -1,6 +1,7 @@
 const {SourceMapConsumer, SourceMapGenerator} = require('source-map');
 const lineCounter = require('./utils/lineCounter');
 
+// generate source map? I don't have the patience to view this file
 class SourceMap {
   constructor(mappings, sources) {
     this.mappings = this.purifyMappings(mappings);

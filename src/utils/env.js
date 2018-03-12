@@ -1,6 +1,7 @@
 const config = require('./config');
 const dotenv = require('dotenv');
 
+// load env configuration under path along side with filepath
 async function loadEnv(filepath) {
   const NODE_ENV = process.env.NODE_ENV || 'development';
   const dotenvFiles = [
@@ -11,7 +12,7 @@ async function loadEnv(filepath) {
     // results for everyone
     NODE_ENV !== 'test' && '.env.local',
     '.env'
-  ].filter(Boolean);
+  ].filter(Boolean); // :bm, 这写法有点6
 
   await Promise.all(
     dotenvFiles.map(async dotenvFile => {

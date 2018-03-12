@@ -1,10 +1,15 @@
 class PromiseQueue {
+  /**
+   *
+   * @param {func} callback, jobs 的回调函数, will be called in form of callback(job, ...args),
+   *  should return a promise
+   */
   constructor(callback) {
-    this.process = callback;
-    this.queue = [];
-    this.processing = new Set();
-    this.processed = new Set();
-    this.runPromise = null;
+    this.process = callback; // the actuall job executor
+    this.queue = [];  // job queue, with [job, args] type
+    this.processing = new Set(); // jobs been processing
+    this.processed = new Set(); // jobs has been processed
+    this.runPromise = null; // the overall job queue been resolved or not
     this.resolve = null;
     this.reject = null;
   }
@@ -23,6 +28,7 @@ class PromiseQueue {
     this.processing.add(job);
   }
 
+  // result: Promise<processed: Set>
   run() {
     if (this.runPromise) {
       return this.runPromise;
@@ -58,8 +64,8 @@ class PromiseQueue {
     }
 
     if (this.queue.length > 0) {
-      while (this.queue.length > 0) {
-        this._runJob(...this.queue.shift());
+      while (this.queue.length > 0) { // :bm, 要注意这一块的执行逻辑不是线性的, 是递归向下的, 逻辑可以说时很诡异的了
+        this._runJob(...this.queue.shift()); // :bm, 这边执行完的逻辑好诡异呀, _reset 又会 调用 _next
       }
     } else if (this.processing.size === 0) {
       this.resolve(this.processed);

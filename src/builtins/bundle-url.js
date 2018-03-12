@@ -6,7 +6,7 @@ function getBundleURLCached() {
 
   return bundleURL;
 }
-
+// :bm, this hack is cool,
 function getBundleURL() {
   // Attempt to find the URL of the current script and use that as the base URL
   try {

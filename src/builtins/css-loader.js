@@ -27,4 +27,5 @@ function reloadCSS() {
   }, 50);
 }
 
+// force all css styles to update itself
 module.exports = reloadCSS;

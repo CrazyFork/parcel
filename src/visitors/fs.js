@@ -6,6 +6,10 @@ const logger = require('../Logger');
 
 const bufferTemplate = template('Buffer(CONTENT, ENC)');
 
+/*
+:todo, 这个文件操作babel ast, 操作的有点难懂, 算了以后有时间回来看
+现在直觉来看就是将fs.readFileSync 操作替换成 Buffer()
+*/
 module.exports = {
   AssignmentExpression(path) {
     if (!isRequire(path.node.right, 'fs', 'readFileSync')) {
@@ -16,11 +20,11 @@ module.exports = {
       const binding = path.scope.getBinding(name);
       if (!binding) continue;
 
-      binding.path.setData('__require', path.node);
+      binding.path.setData('__require', path.node); // 在该path下设置元信息
     }
   },
 
-  CallExpression(path, asset) {
+  CallExpression(path, asset) { // 任何函数调用
     // See https://github.com/defunctzombie/node-browser-resolve#skip
     let ignore =
       asset.package &&
@@ -36,7 +40,7 @@ module.exports = {
 
       try {
         [filename, ...args] = path
-          .get('arguments')
+          .get('arguments')// get function call args
           .map(arg => evaluate(arg, vars));
 
         filename = Path.resolve(filename);
@@ -59,12 +63,12 @@ module.exports = {
       }
 
       let replacementNode;
-      if (Buffer.isBuffer(res)) {
+      if (Buffer.isBuffer(res)) { // 如果是 buffer 对象, 文件里的js调用返回的
         replacementNode = bufferTemplate({
           CONTENT: t.stringLiteral(res.toString('base64')),
           ENC: t.stringLiteral('base64')
         });
-      } else {
+      } else { // 如果是string对象
         replacementNode = t.stringLiteral(res);
       }
 
@@ -182,6 +186,7 @@ function NodeNotEvaluatedError(node) {
 
 function evaluate(path, vars) {
   // Inline variables
+  // 将任何 __dirname, __filename变量, 替换成 vars中的固定值
   path.traverse({
     Identifier: function(ident) {
       let key = ident.node.name;
@@ -197,5 +202,5 @@ function evaluate(path, vars) {
     throw new NodeNotEvaluatedError(path.node);
   }
 
-  return res.value;
+  return res.value; // 将对应改变的 path 返回
 }

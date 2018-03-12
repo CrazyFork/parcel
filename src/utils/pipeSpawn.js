@@ -1,5 +1,6 @@
 const spawn = require('cross-spawn');
 
+// spawn child process while pipe std & stderr to current process
 function pipeSpawn(cmd, params, opts) {
   const cp = spawn(cmd, params, opts);
   cp.stdout.pipe(process.stdout);

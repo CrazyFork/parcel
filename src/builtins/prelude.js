@@ -7,6 +7,9 @@
 // orig method which is the require for previous bundles
 
 // eslint-disable-next-line no-global-assign
+
+// this file is used in JSPackager.js, it's source code will be written to
+// outputed bundle js file
 require = (function (modules, cache, entry) {
   // Save the require from previous bundle to this closure if any
   var previousRequire = typeof require === "function" && require;
@@ -38,18 +41,23 @@ require = (function (modules, cache, entry) {
       localRequire.resolve = resolve;
 
       var module = cache[name] = new newRequire.Module(name);
-
+      // :bm
+      // initialize module if missing in cache
+      // so apparently index 0 is the module initialization function,
+      // it's been defined in JSPackger, writeModule method
       modules[name][0].call(module.exports, localRequire, module, module.exports);
     }
 
     return cache[name].exports;
 
     function localRequire(x){
-      return newRequire(localRequire.resolve(x));
+      // .resolve is defined above,
+      return newRequire(localRequire.resolve(x)); // :todo,
     }
 
+    // so {[ init: function ],  [ meta : { [name: string]: [alias: string]] } ] } at index 1, that meta object can override what's been required
     function resolve(x){
-      return modules[name][1][x] || x;
+      return modules[name][1][x] || x; // module index 1 is what?
     }
   }
 
@@ -61,9 +69,9 @@ require = (function (modules, cache, entry) {
 
   newRequire.isParcelRequire = true;
   newRequire.Module = Module;
-  newRequire.modules = modules;
+  newRequire.modules = modules; // type {[name: string]: [module: Module]}
   newRequire.cache = cache;
-  newRequire.parent = previousRequire;
+  newRequire.parent = previousRequire; // ref to parent require function
 
   for (var i = 0; i < entry.length; i++) {
     newRequire(entry[i]);

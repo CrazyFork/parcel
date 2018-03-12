@@ -7,16 +7,21 @@ const crypto = require('crypto');
  * Child bundles are also produced when importing an asset of a different type from
  * the bundle, e.g. importing a CSS file from JS.
  */
+// a bundle can have many assets, asset have many child assets
+// but what's the difference between bundle & asset ?
+// like the official doc above, a bundle represents an output file
+// while asset represets actual file before bundling
+// it's a Tree data structure
 class Bundle {
   constructor(type, name, parent) {
-    this.type = type;
-    this.name = name;
-    this.parentBundle = parent;
-    this.entryAsset = null;
-    this.assets = new Set();
-    this.childBundles = new Set();
-    this.siblingBundles = new Set();
-    this.siblingBundlesMap = new Map();
+    this.type = type; //js, css, sass or ...
+    this.name = name; // filename
+    this.parentBundle = parent; // parent bundle
+    this.entryAsset = null;   // ref to entry asset, namely the main entry file
+    this.assets = new Set(); // containing assets
+    this.childBundles = new Set(); // child bundle
+    this.siblingBundles = new Set();      // refs to siblings, siblings bundle must be different type.
+    this.siblingBundlesMap = new Map(); //:todo, why map, only a single bundle for single type
     this.offsets = new Map();
   }
 
@@ -41,7 +46,7 @@ class Bundle {
     asset.bundles.delete(this);
     this.assets.delete(asset);
   }
-
+  // :todo, line, line number?
   addOffset(asset, line) {
     this.offsets.set(asset, line);
   }
@@ -50,14 +55,18 @@ class Bundle {
     return this.offsets.get(asset) || 0;
   }
 
+  // get or create sibling bundle , the type must not be same with itself.
   getSiblingBundle(type) {
     if (!type || type === this.type) {
       return this;
     }
 
+    // so if sibling bundle doesn't have that type, then create one from itself?
     if (!this.siblingBundlesMap.has(type)) {
       let bundle = new Bundle(
         type,
+        // :note, overide file extension using type value
+        // in order to map different file extension with same type ?
         Path.join(
           Path.dirname(this.name),
           Path.basename(this.name, Path.extname(this.name)) + '.' + type
@@ -79,6 +88,7 @@ class Bundle {
     return bundle;
   }
 
+  // 这操作有点诡异
   createSiblingBundle(entryAsset) {
     let bundle = this.createChildBundle(entryAsset);
     this.siblingBundles.add(bundle);
@@ -94,7 +104,7 @@ class Bundle {
       return newHashes;
     }
 
-    let hash = this.getHash();
+    let hash = this.getHash(); // generate hash base on its containing assets
     newHashes.set(this.name, hash);
 
     let promises = [];
@@ -103,8 +113,8 @@ class Bundle {
       promises.push(this._package(bundler));
     }
 
-    for (let bundle of this.childBundles.values()) {
-      if (bundle.type === 'map') {
+    for (let bundle of this.childBundles.values()) { // bundle children bundles
+      if (bundle.type === 'map') { // source map
         mappings.push(bundle);
       } else {
         promises.push(bundle.package(bundler, oldHashes, newHashes));
@@ -112,7 +122,7 @@ class Bundle {
     }
 
     await Promise.all(promises);
-    for (let bundle of mappings) {
+    for (let bundle of mappings) {  // bundle all sourcemap type at last
       await bundle.package(bundler, oldHashes, newHashes);
     }
     return newHashes;
@@ -132,6 +142,7 @@ class Bundle {
     await packager.end();
   }
 
+  // add assets & it's depAssets to packager
   async _addDeps(asset, packager, included) {
     if (!this.assets.has(asset) || included.has(asset)) {
       return;
@@ -146,6 +157,7 @@ class Bundle {
     await packager.addAsset(asset);
   }
 
+  // return parent bundles as list []
   getParents() {
     let parents = [];
     let bundle = this;
@@ -158,6 +170,8 @@ class Bundle {
     return parents;
   }
 
+  // return common | null
+  // target bundle has to be in the same level with this bundle, it seems
   findCommonAncestor(bundle) {
     // Get a list of parent bundles going up to the root
     let ourParents = this.getParents();
@@ -184,6 +198,7 @@ class Bundle {
   getHash() {
     let hash = crypto.createHash('md5');
     for (let asset of this.assets) {
+      // create hash from it's assets' hash
       hash.update(asset.hash);
     }
 

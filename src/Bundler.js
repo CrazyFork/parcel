@@ -31,6 +31,10 @@ class Bundler extends EventEmitter {
     this.parser = new Parser(this.options);
     this.packagers = new PackagerRegistry();
     this.cache = this.options.cache ? new FSCache(this.options) : null;
+    /*
+    getImplicitDependencies: (asset: Asset) => [{name: string, ...others}],
+      return any other implicit dependencies related to this asset
+    */
     this.delegate = options.delegate || {};
     this.bundleLoaders = {};
 
@@ -45,7 +49,7 @@ class Bundler extends EventEmitter {
     this.addBundleLoader('js', require.resolve('./builtins/loaders/js-loader'));
 
     this.pending = false;
-    this.loadedAssets = new Map();
+    this.loadedAssets = new Map(); // a cached of loaded assets, type Map<path: string, asset: Asset>
     this.watchedAssets = new Map();
     this.farm = null;
     this.watcher = null;
@@ -138,6 +142,7 @@ class Bundler extends EventEmitter {
       let deps = Object.assign({}, pkg.dependencies, pkg.devDependencies);
       for (let dep in deps) {
         if (dep.startsWith('parcel-plugin-')) {
+          // load parcel plugin, that plugin take the bundle instance as argument
           let plugin = await localRequire(dep, this.mainFile);
           await plugin(this);
         }
@@ -150,6 +155,7 @@ class Bundler extends EventEmitter {
   async bundle() {
     // If another bundle is already pending, wait for that one to finish and retry.
     if (this.pending) {
+      // if in pending state, then once buildEnd, trigger itself `bundle` method, return Promise as result
       return new Promise((resolve, reject) => {
         this.once('buildEnd', () => {
           this.bundle().then(resolve, reject);
@@ -230,6 +236,7 @@ class Bundler extends EventEmitter {
     }
   }
 
+  // loadplugin, env, filewatch , hmr
   async start() {
     if (this.farm) {
       return;
@@ -294,6 +301,7 @@ class Bundler extends EventEmitter {
     return asset;
   }
 
+  // watchedAssets:  {[path: string]: set: Set<Assets>}
   watch(path, asset) {
     if (!this.watcher) {
       return;
@@ -349,6 +357,7 @@ class Bundler extends EventEmitter {
     }
   }
 
+  // this method will get called whenever there's a job been push into this.buildQueue
   async processAsset(asset, isRebuild) {
     if (isRebuild) {
       asset.invalidate();
@@ -385,7 +394,7 @@ class Bundler extends EventEmitter {
     asset.hash = processed.hash;
 
     // Call the delegate to get implicit dependencies
-    let dependencies = processed.dependencies;
+    let dependencies = processed.dependencies;    // Asset.dependencies' map value, it type is [{name: string, ...others: object}]
     if (this.delegate.getImplicitDependencies) {
       let implicitDeps = await this.delegate.getImplicitDependencies(asset);
       if (implicitDeps) {
@@ -410,11 +419,12 @@ class Bundler extends EventEmitter {
     );
 
     // Store resolved assets in their original order
+    // override Assets' dependencies properties
     dependencies.forEach((dep, i) => {
       asset.dependencies.set(dep.name, dep);
       let assetDep = assetDeps[i];
-      if (assetDep) {
-        asset.depAssets.set(dep, assetDep);
+      if (assetDep) { // only deps not includedInParent
+        asset.depAssets.set(dep, assetDep); // Map<dep: Object, assetDep: Asset>
       }
     });
   }
@@ -429,7 +439,7 @@ class Bundler extends EventEmitter {
       if (asset.parentBundle !== bundle) {
         let commonBundle = bundle.findCommonAncestor(asset.parentBundle);
         if (
-          asset.parentBundle !== commonBundle &&
+          asset.parentBundle !== commonBundle && // not in this parent commonBundle
           asset.parentBundle.type === commonBundle.type
         ) {
           this.moveAssetToBundle(asset, commonBundle);
@@ -460,7 +470,7 @@ class Bundler extends EventEmitter {
     }
 
     // If the asset generated a representation for the parent bundle type, also add it there
-    if (asset.generated[bundle.type] != null) {
+    if (asset.generated[bundle.type] != null) { // :?
       bundle.addAsset(asset);
     }
 
@@ -480,10 +490,12 @@ class Bundler extends EventEmitter {
       this.createBundleTree(assetDep, dep, bundle, parentBundles);
     }
 
+    // done with creation, so remove bundle here
     parentBundles.delete(bundle);
     return bundle;
   }
 
+  // move target asset to new parent bundle
   moveAssetToBundle(asset, commonBundle) {
     // Never move the entry asset of a bundle, as it was explicitly requested to be placed in a separate bundle.
     if (asset.parentBundle.entryAsset === asset) {

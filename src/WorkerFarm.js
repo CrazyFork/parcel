@@ -6,7 +6,13 @@ const logger = require('./Logger');
 
 let shared = null;
 
+// 扩展 worker-farm 的 farm, 这个类如果要看懂估计要读下 worker-farm 的源码, 毕竟官方文档烂的一比, js 生态通病
 class WorkerFarm extends Farm {
+  /**
+   *
+   * @param {*} options
+   *  maxConcurrentWorkers:  控制是否执行
+   */
   constructor(options) {
     let opts = {
       maxConcurrentWorkers: getNumWorkers()
@@ -15,6 +21,8 @@ class WorkerFarm extends Farm {
     super(opts, require.resolve('./worker'));
 
     this.localWorker = this.promisifyWorker(require('./worker'));
+    // Farm's method?
+    // setup 应该是 'worker-farm/lib/farm' 这个类的内置方法, init, run 应该是会顺序掉 this 的 `init` 和 `run`方法
     this.remoteWorker = this.promisifyWorker(this.setup(['init', 'run']));
 
     this.started = false;
@@ -31,6 +39,7 @@ class WorkerFarm extends Farm {
     let res = {};
 
     for (let key in worker) {
+      // worker's main methods are all type of  (...args, cb(error, ...rest)), so turn it into promise
       res[key] = promisify(worker[key].bind(worker));
     }
 
@@ -52,6 +61,14 @@ class WorkerFarm extends Farm {
     }
   }
 
+  /**
+   * todo: receive 什么时候被调用的
+   * @param {*} data
+   *    event
+   *    args
+   *    type
+   *    child
+   */
   receive(data) {
     if (data.event) {
       this.emit(data.event, ...data.args);
@@ -64,6 +81,7 @@ class WorkerFarm extends Farm {
     }
   }
 
+  // 判断是否用 remote worker 来处理任务, remote worker 由于使用的 spawn child process 所以起始开销比较大
   shouldUseRemoteWorkers() {
     return this.started && this.warmWorkers >= this.activeChildren;
   }
@@ -115,6 +133,7 @@ class WorkerFarm extends Farm {
   }
 }
 
+// bm: mixin EventEmitter
 for (let key in EventEmitter.prototype) {
   WorkerFarm.prototype[key] = EventEmitter.prototype[key];
 }

@@ -1,0 +1,40 @@
+
+
+
+
+src
+├── Asset.js                     # general asset defination
+├── Bundle.js                    # repr a actual Bundle
+├── Bundler.js                   # Bundle controller
+├── FSCache.js
+├── HMRServer.js
+├── Logger.js                    # implementation of Logger
+├── Parser.js                    # central register of different assets handler
+├── Resolver.js                  # central register for different file type to get its corresponding Asset handler
+├── Server.js
+├── SourceMap.js                 # generate sourcemap
+├── WorkerFarm.js                # utils to spawn workers
+├── assets                       # concrete implementation of Assets of different type
+│   ├── CSSAsset.js
+├── builtins                     # inject builtins into globals spaces, many of file under this folder would be written into outputed js bundle file.
+│   ├── _empty.js
+│   ├── bundle-loader.js
+│   ├── bundle-url.js
+│   ├── css-loader.js
+│   ├── hmr-runtime.js
+│   ├── index.js
+│   ├── loaders
+│   │   ├── css-loader.js
+│   │   ├── js-loader.js
+│   │   └── wasm-loader.js
+│   └── prelude.js
+├── cli.js                        # cli defination using commander
+├── packagers                     # contains implementation of how to package assets
+├── transforms                    # js, css, html ast transformer & tranverse
+├── utils                         # utils
+├── visitors                      # ast visitor
+│   ├── dependencies.js
+│   ├── fs.js
+│   ├── globals.js
+│   └── matches-pattern.js
+└── worker.js                     # spawn process

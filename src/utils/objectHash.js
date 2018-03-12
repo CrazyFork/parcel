@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-
+// create md5 base object value
 function objectHash(object) {
   let hash = crypto.createHash('md5');
   for (let key of Object.keys(object).sort()) {

@@ -18,12 +18,12 @@ class RawPackager extends Packager {
       );
     }
 
-    let contents = asset.generated[asset.type];
-    if (!contents || (contents && contents.path)) {
+    let contents = asset.generated[asset.type]; // asset.generated[asset.type] return asset's content corresponding to its type
+    if (!contents || (contents && contents.path)) { // no content or has content path
       contents = await fs.readFile(contents ? contents.path : asset.name);
     }
 
-    await fs.writeFile(name, contents);
+    await fs.writeFile(name, contents); // this could be an issue for large files
   }
 
   end() {}

@@ -5,9 +5,10 @@ const isURL = require('../utils/is-url');
 const matchesPattern = require('./matches-pattern');
 
 const requireTemplate = template('require("_bundle_loader")');
-const argTemplate = template('require.resolve(MODULE)');
+const argTemplate = template('require.resolve(MODULE)'); // :?
 const serviceWorkerPattern = ['navigator', 'serviceWorker', 'register'];
 
+// visit import, daynamic import, service worker register, web worker to gather resource dependence data.
 module.exports = {
   ImportDeclaration(node, asset) {
     asset.isES6Module = true;
@@ -61,7 +62,7 @@ module.exports = {
 
     const isRegisterServiceWorker =
       types.isStringLiteral(args[0]) &&
-      matchesPattern(callee, serviceWorkerPattern);
+      matchesPattern(callee, serviceWorkerPattern); // :bm, service worker also got checked?
 
     if (isRegisterServiceWorker) {
       addURLDependency(asset, args[0]);
@@ -88,7 +89,7 @@ module.exports = {
 function addDependency(asset, node, opts = {}) {
   if (asset.options.target !== 'browser') {
     const isRelativeImport =
-      node.value.startsWith('/') ||
+      node.value.startsWith('/') || // `/` this counts for relative path?
       node.value.startsWith('./') ||
       node.value.startsWith('../');
 

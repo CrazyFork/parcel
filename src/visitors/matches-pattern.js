@@ -2,6 +2,13 @@ const types = require('babel-types');
 
 // from babel-types. remove when we upgrade to babel 7.
 // https://github.com/babel/babel/blob/0189b387026c35472dccf45d14d58312d249f799/packages/babel-types/src/index.js#L347
+/**
+ * Determines whether or not the input node `member` matches the
+ * input `match`.
+ *
+ * For example, given the match `React.createClass` it would match the
+ * parsed nodes of `React.createClass` and `React["createClass"]`.
+ */
 module.exports = function matchesPattern(member, match, allowPartial) {
   // not a member expression
   if (!types.isMemberExpression(member)) return false;

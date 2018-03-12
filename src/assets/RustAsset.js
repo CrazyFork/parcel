@@ -139,6 +139,7 @@ class RustAsset extends Asset {
       cargoConfig.lib['crate-type'] = [];
     }
 
+    // this would generate a Cargo.toml file under dir(this.name)
     if (!cargoConfig.lib['crate-type'].includes('cdylib')) {
       cargoConfig.lib['crate-type'].push('cdylib');
       await fs.writeFile(
@@ -157,6 +158,7 @@ class RustAsset extends Asset {
     // Rust converts '-' to '_' when outputting files.
     let rustName = cargoConfig.package.name.replace(/-/g, '_');
     this.wasmPath = path.join(outDir, rustName + '.wasm');
+    // :todo, .d what is this guy?
     this.depsPath = path.join(outDir, rustName + '.d');
   }
 

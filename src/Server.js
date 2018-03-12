@@ -9,7 +9,7 @@ const logger = require('./Logger');
 serveStatic.mime.define({
   'application/wasm': ['wasm']
 });
-
+// starts a server that serve bundled assets
 function middleware(bundler) {
   const serve = serveStatic(bundler.options.outDir, {index: false});
 
@@ -67,7 +67,7 @@ async function serve(bundler, port, useHTTPS = false) {
     ? https.createServer(generateCertificate(bundler.options), handler)
     : http.createServer(handler);
 
-  let freePort = await getPort({port});
+  let freePort = await getPort({port}); //:?, generate a random port i think
   server.listen(freePort);
 
   return new Promise((resolve, reject) => {

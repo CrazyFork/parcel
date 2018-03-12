@@ -8,6 +8,7 @@ const PARSERS = {
 
 const existsCache = new Map();
 
+// search any file with name `filenames` existed in siblingpath as `filepath`, return first find file
 async function resolve(filepath, filenames, root = path.parse(filepath).root) {
   filepath = path.dirname(filepath);
 
@@ -29,7 +30,7 @@ async function resolve(filepath, filenames, root = path.parse(filepath).root) {
 
   return resolve(filepath, filenames, root);
 }
-
+// load filename configuration, then return parsed config obj
 async function load(filepath, filenames, root = path.parse(filepath).root) {
   let configFile = await resolve(filepath, filenames, root);
   if (configFile) {
