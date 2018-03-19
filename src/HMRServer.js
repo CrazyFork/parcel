@@ -6,6 +6,7 @@ const generateCertificate = require('./utils/generateCertificate');
 const logger = require('./Logger');
 
 // :todo, server 的逻辑大致看懂了, 问题是如何在一起工作的, 和client端
+// 通过ws 启动了一个 websocket server, 然后调用者可以通过 emitUpdate 来发布事件更新 assets.
 class HMRServer {
   async start(options = {}) {
     await new Promise(resolve => {

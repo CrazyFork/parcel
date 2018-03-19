@@ -1,4 +1,6 @@
-var global = (1, eval)('this'); //:bm
+// 这个模块的工作原理就是, 通过编译阶段注册的 process.env.HMR_HOSTNAME 来启动wss, 建立连接
+// 然后监听请求事件, then react to these events.
+var global = (1, eval)('this'); //:bm, get global object.
 var OldModule = module.bundle.Module;
 function Module(moduleName) {
   OldModule.call(this, moduleName);
@@ -60,6 +62,9 @@ function getParents(bundle, id) {
   var parents = [];
   var k, d, dep;
 
+  /*
+  modules 的最终格式
+  */
   for (k in modules) {
     for (d in modules[k][1]) {
       dep = modules[k][1][d];
@@ -76,6 +81,7 @@ function getParents(bundle, id) {
   return parents;
 }
 
+// new assets
 function hmrApply(bundle, asset) {
   var modules = bundle.modules;
   if (!modules) {
@@ -91,7 +97,8 @@ function hmrApply(bundle, asset) {
   }
 }
 
-function hmrAccept(bundle, id) {
+// not new assets
+function hmrAccept(bundle, id) { // :todo, what is this bundle method
   var modules = bundle.modules;
   if (!modules) {
     return;
@@ -103,7 +110,7 @@ function hmrAccept(bundle, id) {
 
   var cached = bundle.cache[id];
   if (cached && cached.hot._disposeCallback) {
-    cached.hot._disposeCallback();
+    cached.hot._disposeCallback(); // call dispose first
   }
 
   delete bundle.cache[id];
@@ -111,11 +118,11 @@ function hmrAccept(bundle, id) {
 
   cached = bundle.cache[id];
   if (cached && cached.hot && cached.hot._acceptCallback) {
-    cached.hot._acceptCallback();
+    cached.hot._acceptCallback(); // then call hot acceptCallback
     return true;
   }
 
-  return getParents(global.require, id).some(function (id) {
+  return getParents(global.require, id).some(function (id) { // apply hmrAccept to any modules that have deps on this modules
     return hmrAccept(global.require, id)
   });
 }

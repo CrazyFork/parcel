@@ -2,13 +2,14 @@
 
   WorkerFarm 中同时继承两个类的写法, 注意下 EventEmitter mixin的写法
   objectHash 写法
-  本 lib 中大量的 async await 写法, 
+  本 lib 中大量的 async await 写法,
 
   Logger.js 中最下面的 IPC 写法需要好好关注下, 还有用 readline 操作 stdout, stderr cursor
   bundler-loader 中的 LazyPromise 实现需要注意下
     中有些东西没看懂
 
-  hmr-runtime 中的 modules 的操作也是没有看懂, 不知道是 nodejs module 机制 还是 hmr 自有的 module 机制知识缺失
+  hmr-runtime 的实现, 分为 src/HMRServer.js 和 src/builtins/hmr-runtime.js 两种, server 很明显就是 server 端的
+  实现了, hmr-runtime 是实现了 hot module reload 接口的 client 端实现
 
   prelude.js 也没看懂
   builtins 里边的机制还需要捋一捋
@@ -20,10 +21,10 @@
   src/WorkerFarm.js 的实现也需要注意下, 通过底层一个第三方库的支持, 从而实现了任务的多进程执行, 封装来看使用基本看不出任何
   差别和不便
 
-  
 
 
-  visitors 中操作 ast 参考 
+
+  visitors 中操作 ast 参考
     [babel handbook](https://www.npmjs.com/package/babel-plugin-handbook#paths)
     [](https://www.sitepoint.com/understanding-asts-building-babel-plugin/)
 
@@ -37,30 +38,35 @@
 
   代码库中有大量的babel操作, 这个可以说好好借鉴下, (不得不说这js生态库的文档都是尼玛坑爹的, 要找啥找不到)
   还有 postcss 解析 css 语法树的操作
-    
-  
-  src/builtins/prelude.js 
+
+
+  src/builtins/prelude.js
     这个文件的require函数写的好难懂,
     builtins 这个包里边的文件其实写的都比较难懂, 尤其是 resolve 的各种机制,  这里边的文件好多都会被写到最终的bundle的js file当中
 
-  
 
+  modules 的最终格式, 可以看 jspackager 的源码, 最终输出的就是 [[module_src_code: string, dep_info: object], ], module_src_code
+  是一种 var fn = new Function('require', 'module', 'exports', asset.generated.js); 的典型的格式, 
+  dep_info: {[id: number]: [parent_assets] } 的对象格式
 
+ 
 ## Glossary
-* Asset: 一个 Asset 代表一个文件
+* Asset: 一个 Asset 代表一个文件, 最终会根据 Asset 的 id和内容输出打包内容(js packager)
 * Bundle: 是由多个Asset文件组成的, 但是有一个入口, 代表最终打包成的一个文件. Bundle 是一个树形结构的, 代表可以容纳其他Bundle
   * Bundle 中包含Assets 也是一个树形结构的, 只不过是简单的用Set搞的递归, Package 过程会把所有的 Assets 抽离出来
 * Bundler: 负责打包的Controller
 * Parser: 是一个可以通过文件后缀名, 获得对应specific Asset generator 生成对应的Asset
 * Packager: 不同类型不同的Packager, 负责真正的打包事宜
-
+* Loader: 用于加载bundle的, 最终会打包在最终的js bundle中, 通过源码可以发现, parcel 只支持 js, css, wasm 3中loader, 这也
+  可以理解, 因为浏览器最终支持的就是这3种格式的编码文件
+*
 
 
 ## todos
 
 * clear todos
 * hmr 机制
-* 
+* 复杂: bundle 的机制和去重 (这个应该不想看了, 复杂)
 
 ##
 <p align="center">
